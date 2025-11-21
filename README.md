@@ -1,14 +1,17 @@
-# ComfyUI Wheel Installer
+# ComfyUI Wheel Installer & Pip Package Installer
 
-A custom ComfyUI node that installs Python wheels from pre-configured URLs. This node provides a dropdown widget to select and install wheels directly from your ComfyUI workflow.
+Custom ComfyUI nodes for installing Python packages directly from your workflows. Includes two nodes:
+
+1. **Wheel Installer** - Install Python wheels from pre-configured URLs
+2. **Pip Package Installer** - Install pip packages by name from PyPI or other sources
 
 ## Features
 
-- Dropdown widget populated from a configuration file
-- Install Python wheels from URLs
-- Force reinstall option
+- Dropdown widgets populated from configuration files
+- Install Python wheels from URLs or pip packages by name
+- Force reinstall and upgrade options
 - Status output showing installation success/failure
-- Easy configuration through a simple text file
+- Easy configuration through simple text files
 
 ## Installation
 
@@ -23,6 +26,8 @@ git clone https://github.com/marduk191/comfyui_wheel_installer.git
 
 ## Configuration
 
+### Wheel Installer Configuration
+
 Edit the `wheel_urls.txt` file in this directory to add your wheel URLs:
 
 ```txt
@@ -34,39 +39,74 @@ https://example.com/packages/torch-2.0.0-cp311-cp311-linux_x86_64.whl
 https://example.com/packages/pillow-9.5.0-cp311-cp311-manylinux_2_17_x86_64.whl
 ```
 
-### Configuration Guidelines
-
+**Configuration Guidelines:**
 - One URL per line
 - Lines starting with `#` are treated as comments
 - Empty lines are ignored
 - URLs should point directly to `.whl` files
 - The filename will be extracted and shown in the dropdown
 
+### Pip Package Installer Configuration
+
+Edit the `package_names.txt` file in this directory to add package names:
+
+```txt
+# ComfyUI Pip Package Installer - Package Names Configuration
+# Add one package name per line. Lines starting with # are comments.
+# You can specify versions using standard pip syntax.
+
+numpy==1.24.0
+pillow>=9.0.0
+requests
+torch==2.0.0
+transformers
+opencv-python
+```
+
+**Configuration Guidelines:**
+- One package name per line
+- Lines starting with `#` are treated as comments
+- Empty lines are ignored
+- Use standard pip package naming (supports version specifiers like `==`, `>=`, `~=`)
+- Packages will be installed from PyPI unless otherwise configured
+
 ## Usage
 
+### Wheel Installer Node
+
 1. In ComfyUI, add the **Wheel Installer** node to your workflow (found under `utils` category)
-
 2. Select a wheel from the dropdown menu
-
 3. Toggle **force_reinstall** if you want to force reinstallation (useful for updating existing packages)
+4. Run the workflow - the node will install the selected wheel and output status
 
-4. Run the workflow - the node will:
-   - Install the selected wheel using pip
-   - Output a status message
-   - Return a success boolean
-
-### Node Inputs
-
+**Node Inputs:**
 - **wheel_url** (dropdown): Select from configured wheel URLs
 - **force_reinstall** (boolean): Force reinstallation of the package (default: No)
 
-### Node Outputs
-
+**Node Outputs:**
 - **status_message** (STRING): Human-readable status message
 - **success** (BOOLEAN): `True` if installation succeeded, `False` otherwise
 
-## Example Workflow
+### Pip Package Installer Node
 
+1. In ComfyUI, add the **Pip Package Installer** node to your workflow (found under `utils` category)
+2. Select a package from the dropdown menu
+3. Toggle **force_reinstall** to force reinstallation (replaces existing installation)
+4. Toggle **upgrade** to upgrade the package if already installed
+5. Run the workflow - the node will install the selected package and output status
+
+**Node Inputs:**
+- **package_name** (dropdown): Select from configured package names
+- **force_reinstall** (boolean): Force reinstallation of the package (default: No)
+- **upgrade** (boolean): Upgrade the package to the latest version (default: No)
+
+**Node Outputs:**
+- **status_message** (STRING): Human-readable status message
+- **success** (BOOLEAN): `True` if installation succeeded, `False` otherwise
+
+## Example Workflows
+
+### Wheel Installer Example
 ```
 [Wheel Installer Node]
   wheel_url: "https://example.com/package.whl"
@@ -76,27 +116,60 @@ https://example.com/packages/pillow-9.5.0-cp311-cp311-manylinux_2_17_x86_64.whl
   ↓ success: True
 ```
 
+### Pip Package Installer Example
+```
+[Pip Package Installer Node]
+  package_name: "numpy==1.24.0"
+  force_reinstall: No
+  upgrade: No
+
+  ↓ status_message: "Successfully installed: numpy==1.24.0"
+  ↓ success: True
+```
+
 ## Technical Details
 
+**Wheel Installer:**
 - Uses Python's `subprocess` module to call `pip install`
 - Installation timeout: 5 minutes
 - Captures both stdout and stderr
 - Compatible with all Python wheel formats
 
+**Pip Package Installer:**
+- Uses Python's `subprocess` module to call `pip install`
+- Installation timeout: 10 minutes (larger packages may take longer)
+- Captures both stdout and stderr
+- Supports all pip package naming conventions
+- Compatible with version specifiers (`==`, `>=`, `<=`, `~=`, etc.)
+
 ## Troubleshooting
 
-### No wheels showing in dropdown
+### No items showing in dropdown
 
+**For Wheel Installer:**
 - Check that `wheel_urls.txt` exists in the node directory
+- Ensure the file has at least one non-comment, non-empty line
+- Restart ComfyUI after modifying the configuration file
+
+**For Pip Package Installer:**
+- Check that `package_names.txt` exists in the node directory
 - Ensure the file has at least one non-comment, non-empty line
 - Restart ComfyUI after modifying the configuration file
 
 ### Installation fails
 
+**For Wheel Installer:**
 - Verify the wheel URL is accessible
 - Check that the wheel is compatible with your Python version and platform
 - Review the ComfyUI console for detailed error messages
 - Ensure you have write permissions for your Python environment
+
+**For Pip Package Installer:**
+- Verify the package name is correct (check PyPI if unsure)
+- Check for typos in version specifiers
+- Review the ComfyUI console for detailed error messages
+- Ensure you have internet connectivity (for PyPI packages)
+- Verify write permissions for your Python environment
 
 ### Permission errors
 
@@ -104,12 +177,29 @@ https://example.com/packages/pillow-9.5.0-cp311-cp311-manylinux_2_17_x86_64.whl
 - On Linux/Mac, you may need to run ComfyUI with appropriate permissions
 - Consider using user-level installs if system-level installs fail
 
+### Conflicts between force_reinstall and upgrade
+
+- **force_reinstall**: Completely removes and reinstalls the exact version specified
+- **upgrade**: Updates to the latest available version (or version specified)
+- Using both together may cause unexpected behavior - choose one option based on your needs
+
 ## Security Considerations
 
+**General:**
+- Always review the console output for any security warnings from pip
+- Be cautious with force reinstall as it may downgrade packages
+- Only install packages in trusted environments
+
+**Wheel Installer:**
 - Only add wheel URLs from trusted sources
 - Verify wheel integrity before adding to configuration
-- Be cautious with force reinstall as it may downgrade packages
-- Review the console output for any security warnings from pip
+- Ensure URLs use HTTPS when possible
+
+**Pip Package Installer:**
+- Only add package names from trusted sources (verify on PyPI)
+- Be aware that packages can execute code during installation
+- Review package dependencies before installation
+- Consider pinning versions for reproducibility and security
 
 ## License
 
@@ -125,8 +215,16 @@ marduk191
 
 ## Changelog
 
+### v1.1.0 (2025-11-21)
+- Added Pip Package Installer node
+- Install packages by name from PyPI
+- Added upgrade option for Pip Package Installer
+- Extended timeout for pip packages (10 minutes)
+- Updated documentation for both nodes
+
 ### v1.0.0 (2025-11-21)
 - Initial release
+- Wheel Installer node
 - Basic wheel installation from configured URLs
 - Dropdown widget based on configuration file
 - Force reinstall option
