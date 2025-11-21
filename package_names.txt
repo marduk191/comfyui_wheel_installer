@@ -1,11 +1,21 @@
 # ComfyUI Pip Package Installer - Package Names Configuration
 # Add one package name per line. Lines starting with # are comments.
 # You can specify versions using standard pip syntax.
+# You can also include multiple packages and pip flags on a single line.
 
-# Examples (replace with your actual packages):
+# Single package examples:
 numpy==1.24.0
 pillow>=9.0.0
 requests
-torch==2.0.0
 transformers
 opencv-python
+
+# Multiple packages on one line:
+torch torchvision torchaudio
+
+# Custom index URL (for PyTorch with CUDA):
+torch torchvision --index-url https://download.pytorch.org/whl/cu130
+
+# Other pip flags examples:
+# torch --extra-index-url https://download.pytorch.org/whl/cu130
+# numpy scipy --no-cache-dir
