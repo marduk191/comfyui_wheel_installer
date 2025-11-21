@@ -1,0 +1,11 @@
+# ComfyUI Pip Package Installer - Package Names Configuration
+# Add one package name per line. Lines starting with # are comments.
+# You can specify versions using standard pip syntax.
+
+# Examples (replace with your actual packages):
+numpy==1.24.0
+pillow>=9.0.0
+requests
+torch==2.0.0
+transformers
+opencv-python
