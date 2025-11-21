@@ -1,4 +1,5 @@
 import os
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -111,7 +112,10 @@ class PipPackageInstallerNode:
             if upgrade:
                 cmd.append("--upgrade")
 
-            cmd.append(package_name)
+            # Split package_name to handle multiple packages and additional flags
+            # This allows entries like: "torch torchvision --index-url https://..."
+            package_args = shlex.split(package_name)
+            cmd.extend(package_args)
 
             # Execute the installation
             print(f"Installing package: {package_name}")

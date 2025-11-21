@@ -54,21 +54,28 @@ Edit the `package_names.txt` file in this directory to add package names:
 # ComfyUI Pip Package Installer - Package Names Configuration
 # Add one package name per line. Lines starting with # are comments.
 # You can specify versions using standard pip syntax.
+# You can also include multiple packages and pip flags on a single line.
 
+# Single package examples:
 numpy==1.24.0
 pillow>=9.0.0
 requests
-torch==2.0.0
-transformers
-opencv-python
+
+# Multiple packages on one line:
+torch torchvision torchaudio
+
+# Custom index URL (for PyTorch with CUDA):
+torch torchvision --index-url https://download.pytorch.org/whl/cu130
 ```
 
 **Configuration Guidelines:**
-- One package name per line
+- One entry per line (can be a single package or multiple packages with flags)
 - Lines starting with `#` are treated as comments
 - Empty lines are ignored
 - Use standard pip package naming (supports version specifiers like `==`, `>=`, `~=`)
-- Packages will be installed from PyPI unless otherwise configured
+- **Multiple packages and pip flags are supported on a single line**
+- Common flags: `--index-url`, `--extra-index-url`, `--no-cache-dir`, `--no-deps`
+- Packages will be installed from PyPI unless otherwise configured with `--index-url`
 
 ## Usage
 
@@ -119,11 +126,11 @@ opencv-python
 ### Pip Package Installer Example
 ```
 [Pip Package Installer Node]
-  package_name: "numpy==1.24.0"
+  package_name: "torch torchvision --index-url https://download.pytorch.org/whl/cu130"
   force_reinstall: No
   upgrade: No
 
-  ↓ status_message: "Successfully installed: numpy==1.24.0"
+  ↓ status_message: "Successfully installed: torch torchvision --index-url https://download.pytorch.org/whl/cu130"
   ↓ success: True
 ```
 
@@ -141,6 +148,8 @@ opencv-python
 - Captures both stdout and stderr
 - Supports all pip package naming conventions
 - Compatible with version specifiers (`==`, `>=`, `<=`, `~=`, etc.)
+- **Supports multiple packages and pip flags in a single entry** (uses `shlex` for proper argument parsing)
+- Can pass custom index URLs, extra index URLs, and other pip options
 
 ## Troubleshooting
 
@@ -214,6 +223,13 @@ Contributions are welcome! Please feel free to submit issues or pull requests.
 marduk191
 
 ## Changelog
+
+### v1.1.1 (2025-11-21)
+- **Fixed**: Pip Package Installer now properly handles multiple packages and pip flags
+- Support for custom index URLs (e.g., `--index-url https://download.pytorch.org/whl/cu130`)
+- Support for multiple packages on one line (e.g., `torch torchvision torchaudio`)
+- Uses `shlex` for proper argument parsing with quoted strings
+- Updated configuration examples and documentation
 
 ### v1.1.0 (2025-11-21)
 - Added Pip Package Installer node
