@@ -1,5 +1,8 @@
 # ComfyUI Wheel Installer & Pip Package Installer
 
+<img width="943" height="344" alt="image" src="https://github.com/user-attachments/assets/e298dedb-ab20-451c-b080-059dd01ed9dd" />
+
+
 Custom ComfyUI nodes for installing Python packages directly from your workflows. Includes two nodes:
 
 1. **Wheel Installer** - Install Python wheels from pre-configured URLs
